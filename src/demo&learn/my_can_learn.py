@@ -113,6 +113,7 @@ class VCI_CAN_OBJ(Structure):
 # 组大小与Len都设置大于2000，如：2500为宜，可有效防止数据溢出导致地址冲突。同时每
 # 隔30ms调用一次VCI_Receive为宜。（在满足应用的时效性情况下，尽量降低调用VCI_Receive
 # 的频率，只要保证内部缓存不溢出，每次读取并处理更多帧，可以提高运行效率。
+# WaitTime 保留参数。
 
 # VCI_UsbDeviceReset  复位USB-CAN适配器，复位后需要重新使用VCI_OpenDevice打开设备。等同于插拔一次
 # USB设备。
@@ -167,8 +168,22 @@ vci_can_obj1 = VCI_CAN_OBJ(0x421, 0, 0, 1, 0, 0,  1, a, reserved_temp)  # 单次
 vci_can_obj2 = VCI_CAN_OBJ(0x111, 0, 0, 1, 0, 0,  8, b, reserved_temp)  # 单次发送
 
 ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, byref(vci_can_obj1), 1)
-ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, byref(vci_can_obj2), 1000)
 if ret == STATUS_OK:
     print('CAN1通道发送成功\r\n')
 if ret != STATUS_OK:
     print('CAN1通道发送失败\r\n')
+tempI = 100000
+while(tempI):
+    tempI -= 1
+    ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, byref(vci_can_obj2), 1)
+    if ret == STATUS_OK:
+        print('CAN1通道发送成功\r\n')
+    if ret != STATUS_OK:
+        print('CAN1通道发送失败\r\n')
+
+# 关闭设备
+ret = canDLL.VCI_CloseDevice(VCI_USBCAN2,0)
+if ret == STATUS_OK:
+    print('关闭 VCI_CloseDevice成功\r\n')
+if ret != STATUS_OK:
+    print('关闭 VCI_CloseDevice出错\r\n')
