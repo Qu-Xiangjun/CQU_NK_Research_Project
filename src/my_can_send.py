@@ -63,7 +63,7 @@ if ret != STATUS_OK:
 # 通道0发送数据
 ubyte_array = c_ubyte*8
 a = ubyte_array(1, 0, 0, 0, 0, 0, 0, 0)
-b = ubyte_array(1, 796, 0, 0, 0, 0, 0, 0)
+b = ubyte_array(0b10000001,0b1111111, 0, 0, 0, 0, 0, 0)
 ubyte_3array = c_ubyte*3
 reserved_temp = ubyte_3array(0, 0, 0)
 vci_can_obj1 = VCI_CAN_OBJ(0x421, 0, 0, 1, 0, 0,  1, a, reserved_temp)  # 单次发送
@@ -74,7 +74,7 @@ if ret == STATUS_OK:
     print('CAN1通道发送成功\r\n')
 if ret != STATUS_OK:
     print('CAN1通道发送失败\r\n')
-tempI = 1000
+tempI = 100
 while(tempI):
     tempI -= 1
     ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, byref(vci_can_obj2), 1)
@@ -83,31 +83,31 @@ while(tempI):
     if ret != STATUS_OK:
         print('CAN1通道发送失败\r\n')
 
-# 接收数据
-ubyte_array = c_ubyte*8
-receive_array = ubyte_array(0, 0, 0, 0, 0, 0, 0, 0)
-ubyte_3array = c_ubyte*3
-reserved_temp = ubyte_3array(0, 0, 0)
-vci_can_obj = VCI_CAN_OBJ(0x0, 0, 0, 0, 0, 0,  0, receive_array, reserved_temp)  # 复位接收缓存
+# # 接收数据
+# ubyte_array = c_ubyte*8
+# receive_array = ubyte_array(0, 0, 0, 0, 0, 0, 0, 0)
+# ubyte_3array = c_ubyte*3
+# reserved_temp = ubyte_3array(0, 0, 0)
+# vci_can_obj = VCI_CAN_OBJ(0x0, 0, 0, 0, 0, 0,  0, receive_array, reserved_temp)  # 复位接收缓存
 
-# 如果没有接收到数据，一直循环查询接收。
-tempI = 1000
-while(tempI):
-    tempI -= 1
-    ret = canDLL.VCI_Receive(VCI_USBCAN2, 0, 0, byref(vci_can_obj), 2500, 0)
-    if(ret == -1):
-        print('CAN2通道掉线\r\n')
-        break
-    if ret > 0:  # 接收到一帧数据
-        print('CAN2通道接收成功\r\n')
-        print('ID：')
-        print(vci_can_obj.ID)
-        print('DataLen：')
-        print(vci_can_obj.DataLen)
-        print('Data：')
-        print(list(vci_can_obj.Data))
-    else:
-        print('CAN2通道接收失败\r\n')
+# # 如果没有接收到数据，一直循环查询接收。
+# tempI = 1000
+# while(tempI):
+#     tempI -= 1
+#     ret = canDLL.VCI_Receive(VCI_USBCAN2, 0, 0, byref(vci_can_obj), 2500, 0)
+#     if(ret == -1):
+#         print('CAN2通道掉线\r\n')
+#         break
+#     if ret > 0:  # 接收到一帧数据
+#         print('CAN2通道接收成功\r\n')
+#         print('ID：')
+#         print(vci_can_obj.ID)
+#         print('DataLen：')
+#         print(vci_can_obj.DataLen)
+#         print('Data：')
+#         print(list(vci_can_obj.Data))
+#     else:
+#         print('CAN2通道接收失败\r\n')
 
 # 关闭设备
 ret = canDLL.VCI_CloseDevice(VCI_USBCAN2,0)

@@ -1,7 +1,8 @@
 import socket
 # python3.8.0 64位（python 32位要用32位的DLL）
 from ctypes import *
-from navigation_help import *
+from Navigation_help import *
+from Can_frame_help import *
 
 VCI_USBCAN2 = 4 # 设备类型 USBCAN-2A或USBCAN-2C或CANalyst-II 
 STATUS_OK = 1 
@@ -63,6 +64,13 @@ if __name__ == '__main__':
     if ret != STATUS_OK:
         print('调用 VCI_StartCAN0出错\r\n')
     
+    # 设置底盘为指令控制模式
+    ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, byref(get_start_controller_inst()), 1)
+    if ret == STATUS_OK:
+        print('CAN1通道发送成功\r\n')
+    if ret != STATUS_OK:
+        print('CAN1通道发送失败\r\n')
+    
     """
     socket配置
     """
@@ -78,7 +86,7 @@ if __name__ == '__main__':
     """
     while True:
         try:
-            recv_str=connection.recv(5000)
+            recv_str=connection.recv(9216) # 1536个数据，每个为6bytes
         except(ConnectionResetError):
             print("[ConnectionResetError] Lost lidar socket connnetion.")
             break
@@ -86,18 +94,20 @@ if __name__ == '__main__':
         recv_str=recv_str.decode("GBK")  # type(recv_str) = str 
         lidar_data_list = recv_str.split(",")
         lidar_data_list = lidar_data_list[0:-1]
+        # print(lidar_data_list) 
         for i in range(len(lidar_data_list)): # 1536个数据
             lidar_data_list[i] = int(lidar_data_list[i])  # 单位从毫米
-        # print(lidar_data_list) 
-        
+        if(len(lidar_data_list) != 1536):
+            print("[ERROR] Lidar frame's length is not 1536*6 bytes.")
         best_direction = navigate(lidar_data_list) # 导航得到的方向
-        
+        if(best_direction == None):
+            best_direction = 0
+        ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(best_direction,best_speed = 0.2), 1)
+        if ret == STATUS_OK:
+            print('CAN1通道发送成功\r\n')
+        if ret != STATUS_OK:
+            print('CAN1通道发送失败\r\n')
         # 通道0发送数据
-        # 通道0发送数据
-        ubyte_array = c_ubyte*8
-        a = ubyte_array(1, 0, 0, 0, 0, 0, 0, 0)
-        ubyte_3array = c_ubyte*3
-        reserved_temp = ubyte_3array(0, 0, 0)
         
     connection.close()
     

@@ -12,14 +12,18 @@ if __name__ == '__main__':
     # while True:
     # i += 1
     # print(i)
-    recv_str=connection.recv(5000)
+    recv_str=connection.recv(9216) # 1536个数据，每个为6bytes
+    print(len(recv_str))
+    print(recv_str[::-1])
     #recv_str=str(recv_str)  这样不行带有了b''
     recv_str=recv_str.decode("GBK")
+    # print(len(recv_str.encode()))
     # print( recv_str) 
     # print(type(recv_str)) #str 
     lidar_data_list = recv_str.split(",")
     lidar_data_list = lidar_data_list[0:-1]
-    print( lidar_data_list) 
+    print(len(lidar_data_list))
+    # print( lidar_data_list) 
     # connection.send( bytes("test: %s" % recv_str,encoding="GBK") )
     # time.sleep( 0.5 )
     connection.close()

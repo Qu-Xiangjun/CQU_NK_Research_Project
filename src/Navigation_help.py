@@ -1,3 +1,4 @@
+import time 
 """
 五米的距离判断可以前进的
 @lidar_data_list: 原始雷达数据
@@ -9,11 +10,14 @@ def judge5_metre(lidar_data_list):
     end = 0
     for i in range(len(lidar_data_list)-1): # 减一是忽略最后一个数据，以匹配角度的数量
         item = lidar_data_list[i]
-        if abs(2500-item) < 5: # 在5m ±1cm处有障碍物
+        if 2500-item >= 0: # 在5m 内有障碍物
             begin = end
         end += 0.18
-        if(begin - end > 12): # 大于12°的空闲
+        if(end - begin >= 12.24): # 大于12.24°的空闲
             angle5_metre.append((begin + end)/2)
+            if( (begin+end)/2 % 0.18 != 0 ):
+                print("取值错误")
+                exit(1)
     
     return angle5_metre
 """
@@ -27,11 +31,14 @@ def judge2_5_metre(lidar_data_list):
     end = 0
     for i in range(len(lidar_data_list)-1): # 减一是忽略最后一个数据，以匹配角度的数量
         item = lidar_data_list[i]
-        if abs(1250-item) < 5: # 在2.5m±1cm间有障碍物
+        if 1250-item >= 0: # 在2.5m内有障碍物
             begin = end
         end += 0.18
-        if(begin - end > 24): # 大于12°的空闲
+        if(end - begin >= 24.12): # 大于24°的空闲
             angle2_5_metre.append((begin + end)/2)
+            if( (begin+end)/2 % 0.18 != 0 ):
+                print("取值错误")
+                exit(1)
     
     return angle2_5_metre
 
@@ -46,11 +53,14 @@ def judge1metre(lidar_data_list):
     end = 0
     for i in range(len(lidar_data_list)-1): # 减一是忽略最后一个数据，以匹配角度的数量
         item = lidar_data_list[i]
-        if abs(500-item) < 3: # 在2.5m±0.6cm间有障碍物
+        if 500-item >= 0: # 在2.5m±0.6cm间有障碍物
             begin = end
         end += 0.18
-        if(begin - end > 61): # 大于24°的空闲
+        if(end - begin >= 60.84): # 大于60.84°的空闲
             angle1_metre.append((begin + end)/2)
+            if( (begin+end)/2 % 0.18 != 0 ):
+                print("取值错误")
+                exit(1)
     return angle1_metre
 
 """
@@ -64,11 +74,14 @@ def judge0_5metre(lidar_data_list):
     end = 0
     for i in range(len(lidar_data_list)-1): # 减一是忽略最后一个数据，以匹配角度的数量
         item = lidar_data_list[i]
-        if 500-item > 0: # 在0.5m内有障碍物
+        if 500-item >= 0: # 在0.5m内有障碍物
             begin = end
         end += 0.18
-        if(begin - end > 129): # 大于129°的空闲
+        if(end - begin >= 128.88): # 大于128.88°的空闲
             angle0_5_metre.append((begin + end)/2)
+            if( (begin+end)/2 % 0.18 != 0 ):
+                print("取值错误")
+                exit(1)
     return angle0_5_metre
 
 """
@@ -97,14 +110,24 @@ def navigate(lidar_data_list):
     angle2_5_metre = judge2_5_metre(lidar_data_list)
     angle5_metre = judge5_metre(lidar_data_list)
     valid_angle = []
-    for item in angle0_5_metre:
-        if( item in angle1_metre 
-            and item in angle2_5_metre 
-            and item in angle5_metre):
-            valid_angle.append(item)
-    
+    if(len(angle5_metre) != 0 ):
+        for item in angle5_metre:
+            if(item in angle1_metre and item in angle2_5_metre and item in angle0_5_metre):
+                valid_angle.append(item)
+    elif(len(angle2_5_metre) != 0 ):
+        for item in angle2_5_metre:
+            if(item in angle1_metre and item in angle0_5_metre):
+                valid_angle.append(item)
+    elif(len(angle1_metre) != 0 ):
+        for item in angle1_metre:
+            if(item in angle0_5_metre):
+                valid_angle.append(item)
+    elif(len(angle0_5_metre) != 0 ):
+        valid_angle = angle0_5_metre
+        
     if(len(valid_angle) == 0):
         print("[WARNING] There is no effective direction.\n")
+        time.sleep(5)
         best_direction = None
     else:
         best_direction = findbest_direction(valid_angle)
