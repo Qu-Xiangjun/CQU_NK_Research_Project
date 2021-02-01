@@ -34,6 +34,7 @@ class VCI_CAN_OBJ(Structure):
 def get_start_controller_inst():
     ubyte_array = c_ubyte*8
     a = ubyte_array(1, 0, 0, 0, 0, 0, 0, 0)
+    print(1, 0, 0, 0, 0, 0, 0, 0)
     ubyte_3array = c_ubyte*3
     reserved_temp = ubyte_3array(0, 0, 0)
     vci_can_obj = VCI_CAN_OBJ(0x421, 0, 0, 1, 0, 0,
@@ -49,19 +50,19 @@ def get_start_controller_inst():
 def dec_converse(dec):
     if(dec < 0):
         b_str = bin(2**16+(dec))
-        print(b_str)
+        # print(b_str)
         dec = int(b_str, 2) + 1
         b_str = bin(dec)[2:]
-        print(b_str)
-        print(int(b_str[0:7], 2), int(b_str[8:15], 2))
+        # print(b_str)
+        # print(int(b_str[0:7], 2), int(b_str[8:15], 2))
         return (int(b_str[0:7], 2), int(b_str[8:15], 2))
     else:
         b_str = bin(dec)[2:]
-        print(b_str)
+        # print(b_str)
         while(len(b_str) < 16):
             b_str = '0' + b_str
-        print(b_str)
-        print(int(b_str[0:7], 2), int(b_str[8:15], 2))
+        # print(b_str)
+        # print(int(b_str[0:7], 2), int(b_str[8:15], 2))
         return (int(b_str[0:7], 2), int(b_str[8:15], 2))
 
 
@@ -77,7 +78,7 @@ def get_move_inst(best_direction=0, best_speed=200):
     best_speed %= 180
     direc_rad = 0
     speed = best_speed  # 0.2m/s
-    if(best_direction >= -90 | best_direction <= 90):  # 前进
+    if(best_direction >= -90 or best_direction <= 90):  # 前进
         if(best_direction >= 45):
             best_direction = 45
         if(best_direction <= -45):
@@ -88,17 +89,21 @@ def get_move_inst(best_direction=0, best_speed=200):
     else:  # (best_direction > 90)向左后退 == 后退+右转
         best_direction = -(best_direction - 90)
         speed = -speed
+    
+    # 转弯降速
+    speed = (90-abs(best_direction))/90 * speed
 
     direc_rad = math.pi / 180 * best_direction * 1000
     direc_rad = int(direc_rad)
-    speed = int(speed)
+    speed = int(speed * 1000)
 
     (direc1, direc2) = dec_converse(direc_rad)
     (speed1, speed2) = dec_converse(speed)
 
     ubyte_array = c_ubyte*8
     a = ubyte_array(speed1, speed2, direc1, direc2, 0, 0, 0, 0)
+    print(speed1, speed2, direc1, direc2, 0, 0, 0, 0)
     ubyte_3array = c_ubyte*3
     reserved_temp = ubyte_3array(0, 0, 0)
-    vci_can_obj = VCI_CAN_OBJ(0x111, 0, 0, 1, 0, 0,1, a, reserved_temp)  # 单次发送
+    vci_can_obj = VCI_CAN_OBJ(0x111, 0, 0, 1, 0, 0,8, a, reserved_temp)  # 单次发送
     return vci_can_obj

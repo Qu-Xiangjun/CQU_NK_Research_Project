@@ -62,8 +62,9 @@ if ret != STATUS_OK:
 
 # 通道0发送数据
 ubyte_array = c_ubyte*8
+speed = 100
 a = ubyte_array(1, 0, 0, 0, 0, 0, 0, 0)
-b = ubyte_array(0b10000001,0b1111111, 0, 0, 0, 0, 0, 0)
+b = ubyte_array(0,speed, 0, 0, 0, 0, 0, 0)
 ubyte_3array = c_ubyte*3
 reserved_temp = ubyte_3array(0, 0, 0)
 vci_can_obj1 = VCI_CAN_OBJ(0x421, 0, 0, 1, 0, 0,  1, a, reserved_temp)  # 单次发送
@@ -74,7 +75,7 @@ if ret == STATUS_OK:
     print('CAN1通道发送成功\r\n')
 if ret != STATUS_OK:
     print('CAN1通道发送失败\r\n')
-tempI = 100
+tempI = 1000
 while(tempI):
     tempI -= 1
     ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, byref(vci_can_obj2), 1)

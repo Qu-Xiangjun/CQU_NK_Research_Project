@@ -94,20 +94,33 @@ if __name__ == '__main__':
         recv_str=recv_str.decode("GBK")  # type(recv_str) = str 
         lidar_data_list = recv_str.split(",")
         lidar_data_list = lidar_data_list[0:-1]
-        # print(lidar_data_list) 
+        # print(lidar_data_list)
+        dirty_count = 0
         for i in range(len(lidar_data_list)): # 1536个数据
             lidar_data_list[i] = int(lidar_data_list[i])  # 单位从毫米
+            if(lidar_data_list[i] == 0):
+                if(i==0):
+                    lidar_data_list[i] = 10000
+                else:
+                    lidar_data_list[i] = lidar_data_list[i-1]
+                dirty_count += 1
+        # if(dirty_count > 200):
+        #     print("[WARNING] Lidar is very dirty.")
+        #     exit(1)
         if(len(lidar_data_list) != 1536):
             print("[ERROR] Lidar frame's length is not 1536*6 bytes.")
+        # f = open('test.txt', 'w')
+        # f.write(str(lidar_data_list))
+        # f.close()
         best_direction = navigate(lidar_data_list) # 导航得到的方向
         if(best_direction == None):
             best_direction = 0
-        ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(best_direction,best_speed = 0.2), 1)
-        if ret == STATUS_OK:
-            print('CAN1通道发送成功\r\n')
-        if ret != STATUS_OK:
-            print('CAN1通道发送失败\r\n')
-        # 通道0发送数据
+        for i in range(10):
+            ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(best_direction,best_speed = 0.1), 1)
+            if ret == STATUS_OK:
+                print('CAN1通道发送成功\r\n')
+            if ret != STATUS_OK:
+                print('CAN1通道发送失败\r\n')
         
     connection.close()
     
