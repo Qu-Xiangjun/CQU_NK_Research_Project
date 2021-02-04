@@ -1,3 +1,6 @@
+'''
+python socket demo
+'''
 import socket
 import os
 import time

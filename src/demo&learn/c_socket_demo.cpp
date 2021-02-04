@@ -1,3 +1,6 @@
+/*
+c++ socket demo
+*/
 #include <stdio.h>  
 #include <Winsock2.h>  
 #pragma comment(lib,"ws2_32.lib")

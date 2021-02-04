@@ -1,11 +1,12 @@
 import socket
 import time
 from threading import Thread
+import numpy as np
 # python3.8.0 64位（python 32位要用32位的DLL）
 from ctypes import *
 from Navigation_help import *
 from Can_frame_help import *
-import draw_lidar
+import draw_lidar_help
 
 VCI_USBCAN2 = 4 # 设备类型 USBCAN-2A或USBCAN-2C或CANalyst-II 
 STATUS_OK = 1 
@@ -85,11 +86,13 @@ if __name__ == '__main__':
     print("socket ip address:", address)
     
     global lidar_data_list
+    lidar_data_list = [0 for i in range(1536)]  # 初始化
     
     """
     绘制雷达图线程函数
     """
-    thread_draw_lidar = Thread(target=draw_lidar.draw_lidar)
+    thread_draw_lidar = draw_lidar_help.draw_lidar_help(lidar_data_list)
+    thread_draw_lidar.start()    
     
     """
     执行导航
@@ -104,7 +107,7 @@ if __name__ == '__main__':
         recv_str=recv_str.decode("GBK")  # type(recv_str) = str 
         lidar_data_bytes = recv_str.split(",")
         lidar_data_bytes = lidar_data_bytes[0:-1]
-        # print(lidar_data_list)
+
         dirty_count = 0
         for i in range(len(lidar_data_bytes)): # 1536个数据
             lidar_data_bytes[i] = int(lidar_data_bytes[i])  # 单位从毫米
@@ -115,18 +118,28 @@ if __name__ == '__main__':
                     lidar_data_bytes[i] = lidar_data_bytes[i-1]
                 dirty_count += 1
         lidar_data_list = lidar_data_bytes
+        
         # if(dirty_count > 200): # 脏点太多，设置界限报错
         #     print("[WARNING] Lidar is very dirty.")
         #     exit(1)
         # print("lidar_data_list",lidar_data_list)
+        
+        # 数据不规整报错
         if(len(lidar_data_list) != 1536):
             print("[ERROR] Lidar frame's length is not 1536*6 bytes.")
+            continue 
+        
+        # 写入文件查看数据
         # f = open('test.txt', 'w')
         # f.write(str(lidar_data_list))
         # f.close()
+        
+        thread_draw_lidar.lidar_data_list = lidar_data_list # 更新绘图线程的雷达数据
         best_direction = navigate(lidar_data_list) # 导航得到的方向
         print("best_direction",best_direction)
         # time.sleep(1)
+        
+        # 发送控制命令给小车
         if(best_direction == None):
             # 没有方向时就自转找方向
             best_direction = 20
@@ -136,7 +149,7 @@ if __name__ == '__main__':
             if ret != STATUS_OK:
                 print('CAN1通道发送失败\r\n')
             continue
-        for i in range(1):
+        for i in range(1): # 只用发送一次即可，这里可设置循环增强控制效果
             ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(best_direction,best_speed = 0.25), 1)
             if ret == STATUS_OK:
                 print('CAN1通道发送成功\r\n')

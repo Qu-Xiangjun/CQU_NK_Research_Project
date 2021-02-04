@@ -79,10 +79,13 @@ def get_move_inst(best_direction=0, best_speed=0.15):
     direc_rad = 0
     speed = best_speed  # 0.015m/s
     if(best_direction >= -90 or best_direction <= 90):  # 前进
+        
         if(best_direction >= 45):
             best_direction = 45
+            speed = 0
         if(best_direction <= -45):
             best_direction = -45
+            speed = 0
     elif(best_direction < -90):  # 向右后退 == 后退+左转
         best_direction = -(best_direction + 90)
         speed = -speed

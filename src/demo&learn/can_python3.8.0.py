@@ -1,3 +1,6 @@
+'''
+can接口官方sdk demo
+'''
 # python3.8.0 64位（python 32位要用32位的DLL）
 #
 from ctypes import *

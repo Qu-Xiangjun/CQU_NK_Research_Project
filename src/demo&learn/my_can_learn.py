@@ -1,3 +1,6 @@
+'''
+学习can接口sdk使用笔记
+'''
 # python3.8.0 64位（python 32位要用32位的DLL）
 #
 from ctypes import *
