@@ -71,13 +71,13 @@ def dec_converse(dec):
 @best_direction: 最优的移动方向
 @return: vci_can_obj 控制帧体
 """
-def get_move_inst(best_direction=0, best_speed=200):
+def get_move_inst(best_direction=0, best_speed=0.15):
     # 计算车命令的对应行进速度和转向
     # 前进为mm/s,[-3000,3000]
     # 转向为0.001rad/s,[-2523,2523]
-    best_speed %= 180
+    best_direction %= 180
     direc_rad = 0
-    speed = best_speed  # 0.2m/s
+    speed = best_speed  # 0.015m/s
     if(best_direction >= -90 or best_direction <= 90):  # 前进
         if(best_direction >= 45):
             best_direction = 45

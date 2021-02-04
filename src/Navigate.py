@@ -1,8 +1,11 @@
 import socket
+import time
+from threading import Thread
 # python3.8.0 64位（python 32位要用32位的DLL）
 from ctypes import *
 from Navigation_help import *
 from Can_frame_help import *
+import draw_lidar
 
 VCI_USBCAN2 = 4 # 设备类型 USBCAN-2A或USBCAN-2C或CANalyst-II 
 STATUS_OK = 1 
@@ -81,6 +84,13 @@ if __name__ == '__main__':
     print("socket connect:",connection)
     print("socket ip address:", address)
     
+    global lidar_data_list
+    
+    """
+    绘制雷达图线程函数
+    """
+    thread_draw_lidar = Thread(target=draw_lidar.draw_lidar)
+    
     """
     执行导航
     """
@@ -92,31 +102,42 @@ if __name__ == '__main__':
             break
         #recv_str=str(recv_str)  这样不行带有了b''
         recv_str=recv_str.decode("GBK")  # type(recv_str) = str 
-        lidar_data_list = recv_str.split(",")
-        lidar_data_list = lidar_data_list[0:-1]
+        lidar_data_bytes = recv_str.split(",")
+        lidar_data_bytes = lidar_data_bytes[0:-1]
         # print(lidar_data_list)
         dirty_count = 0
-        for i in range(len(lidar_data_list)): # 1536个数据
-            lidar_data_list[i] = int(lidar_data_list[i])  # 单位从毫米
-            if(lidar_data_list[i] == 0):
+        for i in range(len(lidar_data_bytes)): # 1536个数据
+            lidar_data_bytes[i] = int(lidar_data_bytes[i])  # 单位从毫米
+            if(lidar_data_bytes[i] == 0):
                 if(i==0):
-                    lidar_data_list[i] = 10000
+                    lidar_data_bytes[i] = 10000
                 else:
-                    lidar_data_list[i] = lidar_data_list[i-1]
+                    lidar_data_bytes[i] = lidar_data_bytes[i-1]
                 dirty_count += 1
-        # if(dirty_count > 200):
+        lidar_data_list = lidar_data_bytes
+        # if(dirty_count > 200): # 脏点太多，设置界限报错
         #     print("[WARNING] Lidar is very dirty.")
         #     exit(1)
+        # print("lidar_data_list",lidar_data_list)
         if(len(lidar_data_list) != 1536):
             print("[ERROR] Lidar frame's length is not 1536*6 bytes.")
         # f = open('test.txt', 'w')
         # f.write(str(lidar_data_list))
         # f.close()
         best_direction = navigate(lidar_data_list) # 导航得到的方向
+        print("best_direction",best_direction)
+        # time.sleep(1)
         if(best_direction == None):
-            best_direction = 0
-        for i in range(10):
-            ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(best_direction,best_speed = 0.1), 1)
+            # 没有方向时就自转找方向
+            best_direction = 20
+            ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(best_direction,0), 1)
+            if ret == STATUS_OK:
+                print('CAN1通道发送成功\r\n')
+            if ret != STATUS_OK:
+                print('CAN1通道发送失败\r\n')
+            continue
+        for i in range(1):
+            ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(best_direction,best_speed = 0.25), 1)
             if ret == STATUS_OK:
                 print('CAN1通道发送成功\r\n')
             if ret != STATUS_OK:

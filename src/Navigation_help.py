@@ -107,8 +107,8 @@ def judge0_5metre(lidar_data_list):
 def findbest_direction(valid_angle):
     best_direction = 18000
     for item in valid_angle:
-        if(abs(item - 8824) <= best_direction):
-            best_direction = item - 8824
+        if(abs(item - 13824) <= abs(best_direction)):
+            best_direction = item - 13824
     return best_direction
 
 """
@@ -141,8 +141,11 @@ def navigate(lidar_data_list):
         
     if(len(valid_angle) == 0):
         print("[WARNING] There is no effective direction.\n")
-        time.sleep(0.5)
+        # time.sleep(0.5)
         best_direction = None
     else:
         best_direction = findbest_direction(valid_angle)/100.0
+        if(abs(best_direction) < 1.5):
+            best_direction = 0
+    
     return best_direction
