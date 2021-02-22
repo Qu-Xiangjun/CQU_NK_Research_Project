@@ -8,10 +8,12 @@ import random
 import matplotlib.pyplot as plt
 import threading
 
+
 class draw_lidar_help(threading.Thread):
-    def __init__(self,lidar_data_list):
+    def __init__(self, lidar_data_list):
         threading.Thread.__init__(self)
         self.lidar_data_list = lidar_data_list
+
     def run(self):
         '''
         根据雷达数据，用cv2画出雷达图
@@ -35,7 +37,7 @@ class draw_lidar_help(threading.Thread):
                 print((Abscissa, Ordinate))
                 # 用CV2画线，中心位置在(250,250),和目标点，颜色是(255,0,0),线宽1
                 cv2.line(graph, (250, 250), (Abscissa+250,
-                                            Ordinate+250), (255, 0, 0), 1)
+                                             Ordinate+250), (255, 0, 0), 1)
                 # cv2.circle(graph, (300, 300), 2, (255, 255, 0))
                 cv2.imshow('graph', graph)
             cv2.waitKey(1)

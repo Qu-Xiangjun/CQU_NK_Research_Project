@@ -1,11 +1,26 @@
 import socket
 import os
+import sys
+import numpy as np
+import pickle, struct
+
 client = socket.socket()
 print(client)
 
-address = ('192.168.1.152', 8001)
+address = ('127.0.0.1', 8100)
 client.connect(address)
 
-print(client.recv(1024))
+header = client.recv(4)
+print(sys.getsizeof(header))
+size = struct.unpack('i', header)
+# print(type(size)) # tuple
+print('data size:', size)
+
+#Receive data
+recv_data = client.recv(size[0])
+
+data = recv_data
+data = pickle.loads(data)
+print(data)
 
 
