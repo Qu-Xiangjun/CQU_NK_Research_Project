@@ -17,12 +17,8 @@ from PIL import Image, ImageTk
 
 
 class Cammer_Work_Thread(threading.Thread):
-    def __init__(self, window, panel_camera, panel_lidar):
+    def __init__(self):
         threading.Thread.__init__(self)  # 初始化父类
-
-        self.window = window
-        self.panel_camera = panel_camera
-        self.panel_lidar = panel_lidar
 
         # 保存图像的信息
         self.count = 0
@@ -33,6 +29,9 @@ class Cammer_Work_Thread(threading.Thread):
         self.numArray = None
         # 雷达信息
         self.lidar_data_list = None
+        
+        # 开始标志
+        self.flag = False
 
     def run(self):
         """
@@ -52,14 +51,17 @@ class Cammer_Work_Thread(threading.Thread):
         while(True):
             # 接收雷达数据
             header_lidar = self.client.recv(4)
+            # 对齐数据作用
+            self.client.sendall(header_lidar)
+
             lidar_size = struct.unpack('i', header_lidar)
             lidar_size_temp = lidar_size[0]
-            if(lidar_size_temp > 1024):
-                recv_lidar = self.client.recv(1024)  # 1536个数据
-                lidar_size_temp -= 1024
-                while(lidar_size_temp > 1024):
-                    recv_lidar += self.client.recv(1024)
-                    lidar_size_temp -= 1024
+            if(lidar_size_temp > 8192):
+                recv_lidar = self.client.recv(8192)  # 1536个数据
+                lidar_size_temp -= 8192
+                while(lidar_size_temp > 8192):
+                    recv_lidar += self.client.recv(8192)
+                    lidar_size_temp -= 8192
                 recv_lidar += self.client.recv(lidar_size_temp)
             else:
                 recv_lidar = self.client.recv(lidar_size_temp)  # 1536个数据
@@ -67,17 +69,22 @@ class Cammer_Work_Thread(threading.Thread):
             self.lidar_data_list = pickle.loads(recv_lidar)
             print(sys.getsizeof(recv_lidar), lidar_size[0])
             # print(self.lidar_data_list)
+            # 对齐数据作用
+            self.client.sendall(header_lidar)
 
             # 接收图像数据
             header_cam = self.client.recv(4)
+            # 对齐数据作用
+            self.client.sendall(header_lidar)
+
             cam_size = struct.unpack('i', header_cam)
             cam_size_temp = cam_size[0]
-            if(cam_size_temp > 1024):
-                recv_cam = self.client.recv(1024)  # 1536个数据
-                cam_size_temp -= 1024
-                while(cam_size_temp > 1024):
-                    recv_cam += self.client.recv(1024)
-                    cam_size_temp -= 1024
+            if(cam_size_temp > 8192):
+                recv_cam = self.client.recv(8192)  # 1536个数据
+                cam_size_temp -= 8192
+                while(cam_size_temp > 8192):
+                    recv_cam += self.client.recv(8192)
+                    cam_size_temp -= 8192
                 recv_cam += self.client.recv(cam_size_temp)
             else:
                 recv_cam = self.client.recv(cam_size_temp)  # 1536个数据
@@ -89,31 +96,8 @@ class Cammer_Work_Thread(threading.Thread):
             # 对齐数据作用
             self.client.sendall(header_cam)
             print(sys.getsizeof(header_cam))
-
             print("接收数据成功")
-
-            # 显示雷达图像
-            graph = np.zeros((500, 500, 3), np.uint8)
-            angle = -48.42+90  # +90为将图像顺时针转动90°
-            for radius in self.lidar_data_list:  # 遍历半径
-                radius = radius*0.1/2  # 换为0.5cm为单位
-                Abscissa = int(math.cos(angle*math.pi/180) * radius)  # 横坐标
-                Ordinate = int(math.sin(angle*math.pi/180) * radius)  # 纵坐标
-                angle -= 0.18
-                if(abs(int(Abscissa)) >= 250 or abs(int(Ordinate)) >= 250):  # 超出地图5m
-                    continue
-                # 用CV2画线，中心位置在(250,250),和目标点，颜色是(255,0,0),线宽1
-                cv2.line(graph, (250, 250), (Abscissa+250,
-                                             Ordinate+250), (255, 0, 0), 1)
-            current_image1 = Image.fromarray(graph)
-            imgtk1 = ImageTk.PhotoImage(image=current_image1)
-            self.panel_lidar.config(image=imgtk1)
-
-            # 显示摄像头图像
-            current_image = Image.fromarray(
-                self.numArray).resize((800, 600), Image.ANTIALIAS)
-            imgtk = ImageTk.PhotoImage(image=current_image)
-            self.panel_camera.config(image=imgtk)
+            self.flag = True
 
     def close_socket(self):
         """
@@ -121,10 +105,56 @@ class Cammer_Work_Thread(threading.Thread):
         """
         self.client.close()
 
-    def jpg_save():
+    def jpg_save(self):
         current_image = Image.fromarray(
             self.numArray).resize((800, 600), Image.ANTIALIAS)
         current_image.save("Photo"+str(self.count)+".jpg", "jpg")
+
+
+class Image_Work_Thread(threading.Thread):
+    """
+    绘制图像线程
+    """
+
+    def __init__(self, cammer_work_thread, window, panel_camera, panel_lidar):
+        threading.Thread.__init__(self)  # 初始化父类
+        self.cammer_work_thread = cammer_work_thread  # 数据接收线程
+        self.window = window  # 窗体
+        self.panel_camera = panel_camera  # 摄像头panel
+        self.panel_lidar = panel_lidar  # 雷达图panel
+        self.lidar_data_list = []
+        self.numArray = []
+
+    def run(self):
+        """
+        绘制图像（雷达图和摄像头）
+        """
+        while(True):
+            self.lidar_data_list = cammer_work_thread.lidar_data_list
+            self.numArray = cammer_work_thread.numArray
+            if(cammer_work_thread.flag):
+                # 显示雷达图像
+                graph = np.zeros((500, 500, 3), np.uint8)
+                angle = -48.42+90  # +90为将图像顺时针转动90°
+                for radius in self.lidar_data_list:  # 遍历半径
+                    radius = radius*0.1/2  # 换为0.5cm为单位
+                    Abscissa = int(math.cos(angle*math.pi/180) * radius)  # 横坐标
+                    Ordinate = int(math.sin(angle*math.pi/180) * radius)  # 纵坐标
+                    angle -= 0.18
+                    if(abs(int(Abscissa)) >= 250 or abs(int(Ordinate)) >= 250):  # 超出地图5m
+                        continue
+                    # 用CV2画线，中心位置在(250,250),和目标点，颜色是(255,0,0),线宽1
+                    cv2.line(graph, (250, 250), (Abscissa+250,
+                                                 Ordinate+250), (255, 0, 0), 1)
+                current_image1 = Image.fromarray(graph)
+                imgtk1 = ImageTk.PhotoImage(image=current_image1)
+                self.panel_lidar.config(image=imgtk1)
+
+                # 显示摄像头图像
+                current_image = Image.fromarray(
+                    self.numArray).resize((800, 600), Image.ANTIALIAS)
+                imgtk = ImageTk.PhotoImage(image=current_image)
+                self.panel_camera.config(image=imgtk)
 
 
 if __name__ == "__main__":
@@ -151,9 +181,10 @@ if __name__ == "__main__":
     # 开始获取画面
     def start_grabbing():
         global cammer_work_thread
-        cammer_work_thread = Cammer_Work_Thread(
-            window, panel_camera, panel_lidar)
+        cammer_work_thread = Cammer_Work_Thread()
+        image_work_thread = Image_Work_Thread(cammer_work_thread,window, panel_camera, panel_lidar)
         cammer_work_thread.start()
+        image_work_thread.start()
 
     # 保存图像
     def jpg_save():

@@ -1,13 +1,4 @@
-import socket
-import threading
-import os
-import sys
-import numpy as np
-import pickle
-import struct
-
-
-class Socket_Server_Thread(threading.Thread):
+class Socket_Server_Camera_Thread(threading.Thread):
     """
     负责传输视频流,雷达，控制信号等
     """
