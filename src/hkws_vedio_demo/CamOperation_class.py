@@ -329,7 +329,7 @@ class CameraOperation():
 
             # 传输图像数据到client
             self.socket_server_thread.numArray = numArray
-            self.socket_server_thread.lidar_data_list = [500 for i in range(1536)] # 暂时未接入
+            self.socket_server_thread.lidar_data_list = [random.randint(300,500) for i in range(1536)] # 暂时未接入
                         
             # 合并OpenCV到Tkinter界面中
             current_image = Image.fromarray(

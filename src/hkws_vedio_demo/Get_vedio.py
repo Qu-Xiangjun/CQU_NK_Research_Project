@@ -10,6 +10,7 @@ import os
 from PIL import Image, ImageTk
 from CamOperation_class import *
 from Socket_Server_Thread import *
+from Computer_Camera_Thread import *
 sys.path.append("./MvImport")
 from MvCameraControl_class import *
 
@@ -232,9 +233,12 @@ if __name__ == "__main__":
     
     # ch:启动远程图像传输
     def start_camera_transfor():
+        # 打开电脑摄像头
+        computer_camera_thread = Computer_Camera_Thread(socket_server_thread)
+        computer_camera_thread.start()
         # 远程图像传输线程实例化
         socket_server_thread.start()
-        # socket_server_thread.join()
+        
     
     # ch:关闭远程图像传输
     def close_camera_transfor():

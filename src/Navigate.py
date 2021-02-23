@@ -41,7 +41,7 @@ canDLL = windll.LoadLibrary('./ControlCAN.dll')
 # Linux系统下使用下面语句，编译命令：python3 python3.8.0.py
 #canDLL = cdll.LoadLibrary('./libcontrolcan.so')
 
-if __name__ == '__main__':
+def main():
     """
     Can接口连接scout——mini 底盘
     """
@@ -158,3 +158,5 @@ if __name__ == '__main__':
         
     connection.close()
     
+if __name__ == '__main__':
+    main()

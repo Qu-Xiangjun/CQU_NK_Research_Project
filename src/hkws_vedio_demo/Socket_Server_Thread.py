@@ -4,6 +4,7 @@ import os
 import sys
 import numpy as np
 import pickle
+import random
 import struct
 
 
@@ -18,6 +19,9 @@ class Socket_Server_Thread(threading.Thread):
         self.numArray = numArray  # 此为numpy数组
         # 雷达信息
         self.lidar_data_list = lidar_data_list  # 为列表
+        # 电脑摄像头信息
+        self.computer_image = None
+        self.computer_cam_flag = False # 电脑摄像头开启信号
 
     def run(self):
         '''
@@ -35,10 +39,11 @@ class Socket_Server_Thread(threading.Thread):
         
         # 现只测试图像
         while(True):
-            if(len(self.numArray) == 0 or len(self.lidar_data_list) == 0):
+            if(len(self.numArray) == 0 or len(self.lidar_data_list) == 0 or self.computer_cam_flag == False):
                 continue
-            # 发送雷达数据
+            
             try:
+                # 发送雷达数据
                 lidar_data = pickle.dumps(
                     self.lidar_data_list, protocol=0)  # 序列化为字节序列
                 lidar_size = sys.getsizeof(lidar_data)  # 获得图片序列此长度
@@ -56,11 +61,22 @@ class Socket_Server_Thread(threading.Thread):
                 self.connection.sendall(cam_header)
                 temp_size = self.connection.recv(4)
                 self.connection.sendall(cam_data)
-                print("发送图像数据成功")
-                
                 # #接收对齐数据
                 temp_size = self.connection.recv(4)
                 print(sys.getsizeof(temp_size))
+                
+                # 发送电脑摄像头图片
+                comp_image_data = pickle.dumps(self.computer_image, protocol=0)  # 序列化为字节序列
+                comp_image_size = sys.getsizeof(comp_image_data)  # 获得图片序列此长度
+                comp_image_header = struct.pack("i", comp_image_size)  # 传输图片序列长度struct打包
+                self.connection.sendall(comp_image_header)
+                temp_size = self.connection.recv(4)
+                self.connection.sendall(comp_image_data)
+                print("发送图像数据成功")
+                # #接收对齐数据
+                temp_size = self.connection.recv(4)
+                print(sys.getsizeof(temp_size))
+                
             except(Exception):
                 print(Exception)
                 print("socket error")
