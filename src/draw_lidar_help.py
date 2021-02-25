@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import threading
 
 
-class draw_lidar_help(threading.Thread):
-    def __init__(self, lidar_data_list):
+class Draw_Lidar_Help(threading.Thread):
+    def __init__(self):
         threading.Thread.__init__(self)
-        self.lidar_data_list = lidar_data_list
+        self.lidar_data_list = [200 for i in range(1536)] # 初始化雷达列表
 
     def run(self):
         '''

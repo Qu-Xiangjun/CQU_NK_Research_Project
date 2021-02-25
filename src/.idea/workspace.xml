@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="3c1156e9-451b-42ae-81fe-2af57568f528" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/Can_frame_help.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ControlCAN.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Navigate.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Navigation_help.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/draw_lidar_help.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/CamOperation_class.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/Computer_Camera_Thread.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/ConnectSpecCamera/ConnectSpecCamera.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/ConvertPixelType/ConvertPixelType.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/Events/Events.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/Get_vedio.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/GrabImage/GrabImage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/Grab_Callback/Grab_Callback.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MultiCast/MultiCast.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MultipleCameras/CamOperation_class.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MultipleCameras/MultipleCamerasDemo.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MvImport/CameraParams_const.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MvImport/CameraParams_header.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MvImport/MvCameraControl_class.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MvImport/MvErrorDefine_const.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/MvImport/PixelType_header.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/ParametrizeCamera_FileAccess/ParametrizeCamera_FileAccess.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/ParametrizeCamera_LoadAndSave/ParametrizeCamera_LoadAndSave.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/Recording/Recording.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/Socket_Server_Thread.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/classroom_client.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hkws_vedio_demo/temp.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="D:\IntellijIDEA\IntelliJ IDEA 2020.2.3\plugins\maven\lib\maven3" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1osHiOZrhr1UuTXMLgaMa0tEBzg" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3c1156e9-451b-42ae-81fe-2af57568f528" name="Default Changelist" comment="" />
+      <created>1614068518238</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1614068518238</updated>
+      <workItem from="1614068525647" duration="12000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
