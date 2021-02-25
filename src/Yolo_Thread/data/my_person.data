@@ -1,0 +1,4 @@
+classes= 1
+train=data/VOCdevkit/VOC2007/ImageSets/Main/train.txt
+valid=data/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt
+names=data/my_person.names
