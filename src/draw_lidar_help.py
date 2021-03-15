@@ -1,5 +1,7 @@
 """
-此文件负责画出雷达图，包含函数draw_lidar()
+@Author: Qu Xiangjun
+@Time: 2021.02.01
+@Describe: 此文件负责画出雷达图
 """
 import math
 import numpy as np
@@ -10,6 +12,9 @@ import threading
 
 
 class Draw_Lidar_Help(threading.Thread):
+    """
+    绘画雷达图帮助线程
+    """
     def __init__(self):
         threading.Thread.__init__(self)
         self.lidar_data_list = [200 for i in range(1536)] # 初始化雷达列表
@@ -17,11 +22,10 @@ class Draw_Lidar_Help(threading.Thread):
     def run(self):
         '''
         根据雷达数据，用cv2画出雷达图
-        lidar_data_list: 输入的雷达数据
-        注意：lidar_data_list为全局数据，此是为了方便使用线程概念让图像一直在绘制
+        :param lidar_data_list: 输入的雷达数据;lidar_data_list为全局数据，此是为了方便使用线程概念让图像一直在绘制
         '''
         while(True):
-            if(self.lidar_data_list == None):
+            if(self.lidar_data_list == None): # 无雷达数据
                 return
             # 建立二维直角坐标系 ，起始角度为 -45°
             # 注意图像的（0,0）在左上角

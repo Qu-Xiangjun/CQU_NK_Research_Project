@@ -1,4 +1,9 @@
 # -- coding: utf-8 --
+"""
+@Author: Qu Xiangjun
+@Time: 2021.02.01
+@Describe: 此文件为海康威视摄像头的官方sdk附带文件，本人对其中某些东西做了部分修改
+"""
 import sys
 import threading
 import msvcrt

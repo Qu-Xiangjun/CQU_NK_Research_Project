@@ -1,8 +1,10 @@
 # -- coding: utf-8 --
+"""
+@Author: Qu Xiangjun
+@Time: 2021.02.01
+@Describe: GUI图像界面主函数
+"""
 
-from Yolo_Detect_Thread import *
-from MvCameraControl_class import *
-from CamOperation_class import *
 from tkinter import *
 from tkinter.messagebox import *
 import _tkinter
@@ -18,9 +20,11 @@ from Socket_Server_Thread import *
 from Computer_Camera_Thread import *
 from Arduino_Controller_Thread import *
 sys.path.append("./GUI_Main")
+from CamOperation_class import *
 sys.path.append("./GUI_Main/MvImport")
+from MvCameraControl_class import *
 sys.path.append("./Yolo_Thread")
-
+from Yolo_Detect_Thread import * # yolo检测进程
 
 def TxtWrapBy(start_str, end, all):
     """
@@ -58,6 +62,9 @@ def ToHexStr(num):
 
 
 def main():
+    """
+    主程序进程，GUI显示和各个控制线程实例化
+    """
     # 设备列表
     global deviceList
     deviceList = MV_CC_DEVICE_INFO_LIST()
@@ -91,6 +98,9 @@ def main():
     panel = Label(page)
     panel.place(x=190, y=10, height=600, width=1000)  # 摄像头图像放置
 
+    '''
+    所有自定义功能线程实例化
+    '''
     # 目标检测线程实例化
     global yolo_detect_thread
     yolo_detect_thread = Yolo_Detect_Thread()   # 在开始视频流时自动开始检测
@@ -112,11 +122,13 @@ def main():
     navigate_thread = Navigate_Thread(thread_draw_lidar, socket_server_thread)
 
     # 绑定下拉列表至设备信息索引
-
     def xFunc(event):
         global nSelCamIndex  # 相机在相机列表的位置
         nSelCamIndex = TxtWrapBy("[", "]", device_list.get())  # .get()获取下拉框的值
 
+    '''
+    按钮关联函数定义
+    '''
     # ch:枚举相机 | en:enum devices
     def enum_devices():
         global deviceList  # 设备列表
@@ -203,6 +215,7 @@ def main():
         global obj_cam_operation
         obj_cam_operation.Start_grabbing(window, panel)
         yolo_detect_thread.start()  # 开启目标检测
+        yolo_detect_thread.setDaemon(True)
 
     # ch:停止取流 | en:Stop grab image
     def stop_grabbing():
@@ -273,11 +286,12 @@ def main():
         # 打开电脑摄像头
         computer_camera_thread = Computer_Camera_Thread(socket_server_thread)
         computer_camera_thread.start()
+        computer_camera_thread.setDaemon(True) # 设置为子守护线程，防止主线程结束后子程序不退出
         # 远程图像传输线程实例化
         socket_server_thread.start()
+        socket_server_thread.setDaemon(True)
 
     # ch:关闭远程图像传输
-
     def close_camera_transfor():
         try:
             socket_server_thread.close_socket()
@@ -288,15 +302,21 @@ def main():
     # ch: 打开导航
     def start_navigate():
         navigate_thread.start()
+        navigate_thread.setDaemon(True)
 
     # ch: 打开雷达图
     def start_lidar_image():
         thread_draw_lidar.start()
+        thread_draw_lidar.setDaemon(True)
 
     # ch: 打开驱鸟版控制的下位机arduino单片机
     def start_arduino_controller():
         arduino_controller_thread.start()
+        arduino_controller_thread.setDaemon(True)
 
+    '''
+    面板组件定义与放置
+    '''
     xVariable = tkinter.StringVar()  # 将Combobox的内容设置为字符类型，用var来接收传出内容用以显示
     device_list = ttk.Combobox(window, textvariable=xVariable, width=30)
     device_list.place(x=20, y=20)
@@ -385,20 +405,22 @@ def main():
                                           width=20, height=1, command=close_camera_transfor)
     btn_close_camera_transfor.place(x=80, y=400)
 
+    # 打开导航
     btn_start_navigate = tk.Button(window, text='Start Navigate',
                                    width=20, height=1, command=start_navigate)
     btn_start_navigate.place(x=80, y=450)
 
+    # 雷达图像绘画打开
     btn_start_lidar_image = tk.Button(window, text='Lidar Image',
                                       width=20, height=1, command=start_lidar_image)
     btn_start_lidar_image.place(x=80, y=500)
 
+    # arduino下位机控制打开
     btn_start_arduino = tk.Button(window, text='Start Arduino Controller',
                                   width=20, height=1, command=start_arduino_controller)
     btn_start_arduino.place(x=80, y=550)
 
     window.mainloop()
-
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,13 @@
+"""
+@Author: Qu Xiangjun
+@Time: 2021.02.23
+@Describe: 此文件负责定义yolo检测的线程
+"""
+
 import argparse
 from sys import platform
 import threading
 import numpy as np
-
 import models
 from models import *  # set ONNX_EXPORT in models.py
 from utils.datasets import *
@@ -13,7 +18,6 @@ class Yolo_Detect_Thread(threading.Thread):
     """
     目标检测线程
     """
-
     def __init__(self):
         threading.Thread.__init__(self)
         self.img_array = np.array([])

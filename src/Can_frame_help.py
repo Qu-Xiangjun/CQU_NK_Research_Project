@@ -1,3 +1,8 @@
+"""
+@Author: Qu Xiangjun
+@Time: 2021.02.01
+@Describe: 负责生成发送到底盘车的frame帧
+"""
 from ctypes import *
 import math
 
@@ -26,12 +31,11 @@ class VCI_CAN_OBJ(Structure):
                 ("Reserved", c_ubyte*3)  # 保留位
                 ]
 
-
-"""
-控制底盘的首次发送控制帧
-@return: vci_can_obj 控制帧体
-"""
 def get_start_controller_inst():
+    """
+    控制底盘的首次发送控制帧
+    :return vci_can_obj: vci_can_obj 控制帧体
+    """ 
     ubyte_array = c_ubyte*8
     a = ubyte_array(1, 0, 0, 0, 0, 0, 0, 0)
     print(1, 0, 0, 0, 0, 0, 0, 0)
@@ -41,13 +45,12 @@ def get_start_controller_inst():
                               1, a, reserved_temp)  # 单次发送
     return vci_can_obj
 
-
-"""
-将一个十进制的数目转化为16位的两个8bit的十进制
-@dec: 输入的十进制数
-@return: (first,second)
-"""
 def dec_converse(dec):
+    """
+    将一个十进制的数目转化为16位的两个8bit的十进制
+    :param dec: 输入的十进制数
+    :return: (first,second)
+    """
     if(dec < 0):
         b_str = bin(2**16+(dec))
         # print(b_str)
@@ -65,13 +68,13 @@ def dec_converse(dec):
         # print(int(b_str[0:7], 2), int(b_str[8:15], 2))
         return (int(b_str[0:7], 2), int(b_str[8:15], 2))
 
-
-"""
-控制底盘的首次发送控制帧
-@best_direction: 最优的移动方向
-@return: vci_can_obj 控制帧体
-"""
 def get_move_inst(best_direction=0, best_speed=0.15):
+    """
+    控制底盘的首次发送控制帧生成
+    :param best_direction: 最优的移动方向
+    :param best_speed: 最优的移动速度
+    :return: vci_can_obj 控制帧体
+    """
     # 计算车命令的对应行进速度和转向
     # 前进为mm/s,[-3000,3000]
     # 转向为0.001rad/s,[-2523,2523]

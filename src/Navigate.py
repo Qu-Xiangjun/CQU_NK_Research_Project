@@ -1,3 +1,8 @@
+"""
+@Author: Qu Xiangjun
+@Time: 2021.01.26
+@Describe: 此文件负责根据雷达数据进行导航的线程类定义
+"""
 import socket
 import time
 from threading import Thread
@@ -12,8 +17,6 @@ VCI_USBCAN2 = 4  # 设备类型 USBCAN-2A或USBCAN-2C或CANalyst-II
 STATUS_OK = 1
 
 # 定义初始化CAN的数据类型
-
-
 class VCI_INIT_CONFIG(Structure):
     _fields_ = [("AccCode", c_uint),  # 接收滤波验收码
                 ("AccMask", c_uint),  # 接收滤波屏蔽码
@@ -96,9 +99,9 @@ class Navigate_Thread(threading.Thread):
         if ret != STATUS_OK:
             print('CAN1通道发送失败\r\n')
 
-        """
+        '''
         socket配置
-        """
+        '''
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind(("localhost", 8888))  # 服务器端，将Socket与网络地址和端口绑定起来，
         server.listen(0)  # backlog 指定最大的连接数
@@ -109,9 +112,9 @@ class Navigate_Thread(threading.Thread):
         global lidar_data_list
         lidar_data_list = [0 for i in range(1536)]  # 初始化
 
-        """
+        '''
         执行导航
-        """
+        '''
         while True:
             try:
                 recv_str = connection.recv(9216)  # 1536个数据，每个为6bytes

@@ -1,4 +1,9 @@
-# cv2 电脑摄像头
+"""
+@Author: Qu Xiangjun
+@Time: 2021.02.08
+@Describe: 用cv2打开电脑摄像头图像
+"""
+
 import cv2
 from tkinter import *
 import cv2
@@ -11,6 +16,9 @@ class Computer_Camera_Thread(threading.Thread):
     读取电脑摄像头线程
     """
     def __init__(self,socket_server_thread):
+        """
+        :param socket_server_thread: socket服务端线程类（发送图像信息）
+        """
         threading.Thread.__init__(self)  # 初始化父类
         self.socket_server_thread = socket_server_thread
         self.camera = cv2.VideoCapture(0)    #摄像头

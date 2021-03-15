@@ -1,3 +1,9 @@
+"""
+@Author: Qu Xiangjun
+@Time: 2021.02.01
+@Describe: 此文件负责将主摄像头、电脑摄像头、雷达数据用socket传输到远端教室客户端的线程类定义
+"""
+
 import socket
 import threading
 import os
@@ -14,6 +20,10 @@ class Socket_Server_Thread(threading.Thread):
     """
 
     def __init__(self, numArray=np.array([]), lidar_data_list=[200 for i in range(1536)]):
+        """
+        :param numArray: 主摄像头数据
+        :param lidar_data_list: 雷达数据列表
+        """
         threading.Thread.__init__(self)  # 初始化父类
         # 图像信息
         self.numArray = numArray  # 此为numpy数组

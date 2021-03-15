@@ -1,3 +1,9 @@
+"""
+@Author: Qu Xiangjun
+@Time: 2021.02.23
+@Describe: 此文件为定义教室端的主程序
+"""
+
 import socket
 import math
 import threading
@@ -17,6 +23,9 @@ from PIL import Image, ImageTk
 
 
 class Cammer_Work_Thread(threading.Thread):
+    """
+    摄像头数据、雷达数据的soecekt连接与接收
+    """
     def __init__(self):
         threading.Thread.__init__(self)  # 初始化父类
 
@@ -236,7 +245,7 @@ if __name__ == "__main__":
     panel_computer_img = Label(window)
     panel_computer_img.place(x=900, y=320, height=300, width=400)
 
-    # 开始获取画面
+    #ch: 开始获取画面
     def start_grabbing():
         try:
             global cammer_work_thread
@@ -254,7 +263,7 @@ if __name__ == "__main__":
         except:
             return
 
-    # 保存图像
+    #ch: 保存图像
     def jpg_save():
         if(cammer_work_thread != None):
             cammer_work_thread.jpg_save()
@@ -262,7 +271,7 @@ if __name__ == "__main__":
             tkinter.messagebox.showerror(
                 'show error', 'Failed to save image!')
 
-    # 关闭socket
+    #ch: 关闭socket
     def close_scoket_client():
         try:
             cammer_work_thread.close_socket()
@@ -270,17 +279,17 @@ if __name__ == "__main__":
             tkinter.messagebox.showerror(
                 title='show error', message='socket关闭失败。')
 
-    # 获取画面
+    #ch: 获取画面
     btn_start_grabbing = tk.Button(
         window, text='Start Grabbing', width=35, height=1, command=start_grabbing)
     btn_start_grabbing.place(x=300, y=700)
 
-    # 保存图像
+    #ch: 保存图像
     btn_jpg_save = tk.Button(
         window, text='Save Photo', width=35, height=1, command=jpg_save)
     btn_jpg_save.place(x=600, y=700)
 
-    # 关闭socket
+    #ch: 关闭socket
     btn_close_grabbing = tk.Button(
         window, text='Close socket client', width=35, height=1, command=close_scoket_client)
     btn_close_grabbing.place(x=900, y=700)
