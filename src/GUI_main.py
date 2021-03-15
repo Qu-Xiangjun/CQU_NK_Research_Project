@@ -1,5 +1,8 @@
 # -- coding: utf-8 --
 
+from Yolo_Detect_Thread import *
+from MvCameraControl_class import *
+from CamOperation_class import *
 from tkinter import *
 from tkinter.messagebox import *
 import _tkinter
@@ -13,17 +16,20 @@ from Navigate import *
 from Draw_Lidar_Help import *
 from Socket_Server_Thread import *
 from Computer_Camera_Thread import *
+from Arduino_Controller_Thread import *
 sys.path.append("./GUI_Main")
-from CamOperation_class import *
 sys.path.append("./GUI_Main/MvImport")
-from MvCameraControl_class import *
 sys.path.append("./Yolo_Thread")
-from Yolo_Detect_Thread import *
-
-# 获取选取设备信息的索引，通过[]之间的字符去解析
 
 
 def TxtWrapBy(start_str, end, all):
+    """
+    获取选取设备信息的索引，通过[]之间的字符去解析
+    :param start_str: 开始字符
+    :param: end: 结束字符
+    :param: all: 总字符串
+    :return: 返回相应解析的字符串
+    """
     start = all.find(start_str)
     if start >= 0:
         start += len(start_str)
@@ -32,10 +38,13 @@ def TxtWrapBy(start_str, end, all):
             # strip() 方法用于移除字符串头尾指定的字符（默认为空格或换行符）或字符序列。
             return all[start:end].strip()
 
-# 将返回的错误码转换为十六进制显示
-
 
 def ToHexStr(num):
+    """
+    将返回的错误码转换为十六进制显示
+    :param num: 错误码 字符串
+    :return: 十六进制字符串
+    """
     chaDic = {10: 'a', 11: 'b', 12: 'c', 13: 'd', 14: 'e', 15: 'f'}
     hexStr = ""
     if num < 0:
@@ -81,10 +90,14 @@ def main():
     page.pack(expand=True, fill=BOTH)
     panel = Label(page)
     panel.place(x=190, y=10, height=600, width=1000)  # 摄像头图像放置
-    
+
     # 目标检测线程实例化
-    global yolo_detect_thread   
+    global yolo_detect_thread
     yolo_detect_thread = Yolo_Detect_Thread()   # 在开始视频流时自动开始检测
+
+    # arduino下位机控制线程实例化
+    global arduino_controller_thread
+    arduino_controller_thread = Arduino_Controller_Thread(yolo_detect_thread)
 
     # 雷达图绘画线程实例化
     global thread_draw_lidar
@@ -175,8 +188,8 @@ def main():
             tkinter.messagebox.showinfo('show info', 'Camera is Running!')
             return
         obj_cam_operation = CameraOperation(
-            socket_server_thread, # 图像传输线程对象
-            yolo_detect_thread, # 目标检测线程对象
+            socket_server_thread,  # 图像传输线程对象
+            yolo_detect_thread,  # 目标检测线程对象
             cam, deviceList, nSelCamIndex)  # 实例化相机辅助操作类
         ret = obj_cam_operation.Open_device()
         if 0 != ret:
@@ -189,7 +202,7 @@ def main():
     def start_grabbing():
         global obj_cam_operation
         obj_cam_operation.Start_grabbing(window, panel)
-        yolo_detect_thread.start() # 开启目标检测
+        yolo_detect_thread.start()  # 开启目标检测
 
     # ch:停止取流 | en:Stop grab image
     def stop_grabbing():
@@ -280,26 +293,30 @@ def main():
     def start_lidar_image():
         thread_draw_lidar.start()
 
+    # ch: 打开驱鸟版控制的下位机arduino单片机
+    def start_arduino_controller():
+        arduino_controller_thread.start()
+
     xVariable = tkinter.StringVar()  # 将Combobox的内容设置为字符类型，用var来接收传出内容用以显示
     device_list = ttk.Combobox(window, textvariable=xVariable, width=30)
     device_list.place(x=20, y=20)
     device_list.bind("<<ComboboxSelected>>", xFunc)
 
-    label_exposure_time = tk.Label(
-        window, text='Exposure Time', width=15, height=1)
-    label_exposure_time.place(x=20, y=350)
-    text_exposure_time = tk.Text(window, width=15, height=1)
-    text_exposure_time.place(x=160, y=350)
+    # label_exposure_time = tk.Label(
+    #     window, text='Exposure Time', width=15, height=1)
+    # label_exposure_time.place(x=20, y=350)
+    # text_exposure_time = tk.Text(window, width=15, height=1)
+    # text_exposure_time.place(x=160, y=350)
 
-    label_gain = tk.Label(window, text='Gain', width=15, height=1)
-    label_gain.place(x=20, y=400)
-    text_gain = tk.Text(window, width=15, height=1)
-    text_gain.place(x=160, y=400)
+    # label_gain = tk.Label(window, text='Gain', width=15, height=1)
+    # label_gain.place(x=20, y=400)
+    # text_gain = tk.Text(window, width=15, height=1)
+    # text_gain.place(x=160, y=400)
 
-    label_frame_rate = tk.Label(window, text='Frame Rate', width=15, height=1)
-    label_frame_rate.place(x=20, y=450)
-    text_frame_rate = tk.Text(window, width=15, height=1)
-    text_frame_rate.place(x=160, y=450)
+    # label_frame_rate = tk.Label(window, text='Frame Rate', width=15, height=1)
+    # label_frame_rate.place(x=20, y=450)
+    # text_frame_rate = tk.Text(window, width=15, height=1)
+    # text_frame_rate.place(x=160, y=450)
 
     # 查找设备
     btn_enum_devices = tk.Button(
@@ -333,48 +350,52 @@ def main():
         window, text='Stop Grabbing', width=15, height=1, command=stop_grabbing)
     btn_stop_grabbing.place(x=160, y=200)
 
-    # Tigger by Software 单选框，用于trigger_once
-    checkbtn_trigger_software = tk.Checkbutton(
-        window, text='Tigger by Software', variable=triggercheck_val, onvalue=1, offvalue=0)
-    checkbtn_trigger_software.place(x=20, y=250)
-    # 用Tigger by Software 单选框的选择情况作函数执行
-    btn_trigger_once = tk.Button(
-        window, text='Trigger Once', width=15, height=1, command=trigger_once)
-    btn_trigger_once.place(x=160, y=250)
+    # # Tigger by Software 单选框，用于trigger_once
+    # checkbtn_trigger_software = tk.Checkbutton(
+    #     window, text='Tigger by Software', variable=triggercheck_val, onvalue=1, offvalue=0)
+    # checkbtn_trigger_software.place(x=20, y=250)
+    # # 用Tigger by Software 单选框的选择情况作函数执行
+    # btn_trigger_once = tk.Button(
+    #     window, text='Trigger Once', width=15, height=1, command=trigger_once)
+    # btn_trigger_once.place(x=160, y=250)
 
     # 保存图片按钮
     btn_save_bmp = tk.Button(window, text='Save as BMP',
                              width=15, height=1, command=bmp_save)
-    btn_save_bmp.place(x=20, y=300)
+    btn_save_bmp.place(x=20, y=250)
     btn_save_jpg = tk.Button(window, text='Save as JPG',
                              width=15, height=1, command=jpg_save)
-    btn_save_jpg.place(x=160, y=300)
+    btn_save_jpg.place(x=160, y=250)
 
-    # 参数设置与获得
-    btn_get_parameter = tk.Button(
-        window, text='Get Parameter', width=15, height=1, command=get_parameter)
-    btn_get_parameter.place(x=20, y=500)
-    btn_set_parameter = tk.Button(
-        window, text='Set Parameter', width=15, height=1, command=set_parameter)
-    btn_set_parameter.place(x=160, y=500)
+    # # 参数设置与获得
+    # btn_get_parameter = tk.Button(
+    #     window, text='Get Parameter', width=15, height=1, command=get_parameter)
+    # btn_get_parameter.place(x=20, y=500)
+    # btn_set_parameter = tk.Button(
+    #     window, text='Set Parameter', width=15, height=1, command=set_parameter)
+    # btn_set_parameter.place(x=160, y=500)
 
     # 开启远程图像传输
     btn_start_camera_transfor = tk.Button(window, text='Start camera transfor',
                                           width=20, height=1, command=start_camera_transfor)
-    btn_start_camera_transfor.place(x=80, y=550)
+    btn_start_camera_transfor.place(x=80, y=350)
 
     # 关闭远程图像传输
     btn_close_camera_transfor = tk.Button(window, text='Close camera transfor',
                                           width=20, height=1, command=close_camera_transfor)
-    btn_close_camera_transfor.place(x=80, y=600)
+    btn_close_camera_transfor.place(x=80, y=400)
 
     btn_start_navigate = tk.Button(window, text='Start Navigate',
                                    width=20, height=1, command=start_navigate)
-    btn_start_navigate.place(x=80, y=635)
+    btn_start_navigate.place(x=80, y=450)
 
     btn_start_lidar_image = tk.Button(window, text='Lidar Image',
                                       width=20, height=1, command=start_lidar_image)
-    btn_start_lidar_image.place(x=80, y=670)
+    btn_start_lidar_image.place(x=80, y=500)
+
+    btn_start_arduino = tk.Button(window, text='Start Arduino Controller',
+                                  width=20, height=1, command=start_arduino_controller)
+    btn_start_arduino.place(x=80, y=550)
 
     window.mainloop()
 
