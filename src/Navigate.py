@@ -116,6 +116,7 @@ class Navigate_Thread(threading.Thread):
         执行导航
         '''
         while True:
+            # get lidar data
             try:
                 recv_str = connection.recv(9216)  # 1536个数据，每个为6bytes
             except(ConnectionResetError):
@@ -155,6 +156,7 @@ class Navigate_Thread(threading.Thread):
             self.thread_draw_lidar.lidar_data_list = lidar_data_list  # 更新绘图线程的雷达数据
             self.socket_server_thread.lidar_data_list = lidar_data_list # 更新发送雷达数据线程的雷达数据
             
+            # get direction
             best_direction = navigate(lidar_data_list)  # 导航得到的方向
             print("best_direction", best_direction)
             # time.sleep(1)

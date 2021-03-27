@@ -129,6 +129,7 @@ class Yolo_Detect_Thread(threading.Thread):
         #     pred = apply_classifier(pred, modelc, img, im0s)
 
         # Process detections
+        self.result = []
         for i, det in enumerate(pred):  # detections per image # i 为下标 det为值
             # if webcam:  # batch_size >= 1
             #     p, s, im0 = path[i], '%g: ' % i, im0s[i]
@@ -143,7 +144,6 @@ class Yolo_Detect_Thread(threading.Thread):
                 det[:, :4] = scale_coords(
                     img.shape[2:], det[:, :4], im0.shape).round()
 
-                self.result = []
                 # Print results
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  # detections per class
@@ -167,7 +167,7 @@ class Yolo_Detect_Thread(threading.Thread):
 
             # Stream results
             # if view_img:
-            cv2.imshow("imshow", im0)
+            # cv2.imshow("imshow", im0)
             self.detect_img = im0
 
             # Save results (image with detections)

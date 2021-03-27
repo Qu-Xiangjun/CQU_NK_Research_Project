@@ -114,7 +114,7 @@ def findbest_direction(valid_angle):
     :param valid_angle: 有效角度集合
     :return best_direction: 最优前进方向，以中线为0点，左为+，右为-
     """
-    best_direction = 18000
+    best_direction = 18000 # 初始化为右侧180度
     for item in valid_angle:
         if(abs(item - 13824) <= abs(best_direction)):
             best_direction = item - 13824
@@ -156,7 +156,7 @@ def navigate(lidar_data_list):
         best_direction = None
     else:
         best_direction = findbest_direction(valid_angle)/100.0 # 从所有有效方向找最好的
-        if(abs(best_direction) < 1.5): # 方向小于1.5度，即为0度
+        if(abs(best_direction) < 5): # 优化：方向小于5度，即为0度
             best_direction = 0
     
     return best_direction

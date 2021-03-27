@@ -79,6 +79,7 @@ def get_move_inst(best_direction=0, best_speed=0.15):
     # 前进为mm/s,[-3000,3000]
     # 转向为0.001rad/s,[-2523,2523]
     best_direction %= 180
+    best_direction *= 1.3 # 增大转弯幅度
     direc_rad = 0
     speed = best_speed  # 0.015m/s
     if(best_direction >= -90 or best_direction <= 90):  # 前进
