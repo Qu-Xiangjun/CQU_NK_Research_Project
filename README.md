@@ -1,4 +1,4 @@
-# scout_mini_project
+# CQU_NK_Research_Project
 
 ```python
 +--scout_mini_project
