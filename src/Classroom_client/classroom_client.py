@@ -20,6 +20,8 @@ import tkinter.messagebox
 from tkinter import ttk
 import tkinter as tk
 from PIL import Image, ImageTk
+sys.path.append("../")
+from Global_Define_Var import *
 
 
 class Cammer_Work_Thread(threading.Thread):
@@ -51,7 +53,7 @@ class Cammer_Work_Thread(threading.Thread):
         # 配置server段socket信息
         try:
             self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.address = ('127.0.0.1', 8002)  # 同一网段下的本ip地址与端口
+            self.address = default_address  # 同一网段下的本ip地址与端口
             self.client.connect(self.address)  # 服务器端，将Socket与网络地址和端口绑定起来，
             print("连接成功")
         except:
@@ -67,12 +69,12 @@ class Cammer_Work_Thread(threading.Thread):
 
             lidar_size = struct.unpack('i', header_lidar)
             lidar_size_temp = lidar_size[0]
-            if(lidar_size_temp > 40960):
-                recv_lidar = self.client.recv(40960)  # 1536个数据
-                lidar_size_temp -= 40960
-                while(lidar_size_temp > 40960):
-                    recv_lidar += self.client.recv(40960)
-                    lidar_size_temp -= 40960
+            if(lidar_size_temp > socket_buf):
+                recv_lidar = self.client.recv(socket_buf)  # 1536个数据
+                lidar_size_temp -= socket_buf
+                while(lidar_size_temp > socket_buf):
+                    recv_lidar += self.client.recv(socket_buf)
+                    lidar_size_temp -= socket_buf
                 recv_lidar += self.client.recv(lidar_size_temp)
             else:
                 recv_lidar = self.client.recv(lidar_size_temp)  # 1536个数据
@@ -88,12 +90,12 @@ class Cammer_Work_Thread(threading.Thread):
 
             cam_size = struct.unpack('i', header_cam)
             cam_size_temp = cam_size[0]
-            if(cam_size_temp > 20480):
-                recv_cam = self.client.recv(20480)  # 1536个数据
-                cam_size_temp -= 20480
-                while(cam_size_temp > 20480):
-                    recv_cam += self.client.recv(20480)
-                    cam_size_temp -= 20480
+            if(cam_size_temp > socket_buf):
+                recv_cam = self.client.recv(socket_buf)  # 1536个数据
+                cam_size_temp -= socket_buf
+                while(cam_size_temp > socket_buf):
+                    recv_cam += self.client.recv(socket_buf)
+                    cam_size_temp -= socket_buf
                 recv_cam += self.client.recv(cam_size_temp)
             else:
                 recv_cam = self.client.recv(cam_size_temp)  # 1536个数据
@@ -109,12 +111,12 @@ class Cammer_Work_Thread(threading.Thread):
 
             comp_img_size = struct.unpack('i', header_comp_img)
             comp_img_size_temp = comp_img_size[0]
-            if(comp_img_size_temp > 40960):
-                recv_comp_img = self.client.recv(40960)  # 1536个数据
-                comp_img_size_temp -= 40960
-                while(comp_img_size_temp > 40960):
-                    recv_comp_img += self.client.recv(40960)
-                    comp_img_size_temp -= 40960
+            if(comp_img_size_temp > socket_buf):
+                recv_comp_img = self.client.recv(socket_buf)  # 1536个数据
+                comp_img_size_temp -= socket_buf
+                while(comp_img_size_temp > socket_buf):
+                    recv_comp_img += self.client.recv(socket_buf)
+                    comp_img_size_temp -= socket_buf
                 recv_comp_img += self.client.recv(comp_img_size_temp)
             else:
                 recv_comp_img = self.client.recv(comp_img_size_temp)  # 1536个数据

@@ -286,10 +286,10 @@ def main():
         # 打开电脑摄像头
         computer_camera_thread = Computer_Camera_Thread(socket_server_thread)
         computer_camera_thread.start()
-        computer_camera_thread.setDaemon(True) # 设置为子守护线程，防止主线程结束后子程序不退出
+        # computer_camera_thread.setDaemon(True) # 设置为子守护线程，防止主线程结束后子程序不退出
         # 远程图像传输线程实例化
         socket_server_thread.start()
-        socket_server_thread.setDaemon(True)
+        # socket_server_thread.setDaemon(True)
 
     # ch:关闭远程图像传输
     def close_camera_transfor():

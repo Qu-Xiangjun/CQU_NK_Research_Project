@@ -56,6 +56,10 @@ class Navigate_Thread(threading.Thread):
     """
 
     def __init__(self,thread_draw_lidar, socket_server_thread):
+        """
+        :param thread_draw_lidar: 绘画雷达图线程类实例
+        :param socket_server_thread: 远程Socket传输数据类实例
+        """
         threading.Thread.__init__(self)  # 初始化父类
 
         # 绘制雷达
@@ -112,6 +116,8 @@ class Navigate_Thread(threading.Thread):
         global lidar_data_list
         lidar_data_list = [0 for i in range(1536)]  # 初始化
 
+        register_direct = 0 # 记忆上一次转动方向，1位左，0位前进，-1位右
+
         '''
         执行导航
         '''
@@ -131,17 +137,21 @@ class Navigate_Thread(threading.Thread):
             for i in range(len(lidar_data_bytes)):  # 1536个数据
                 lidar_data_bytes[i] = int(lidar_data_bytes[i])  # 单位从毫米
                 if(lidar_data_bytes[i] == 0):
-                    if(i == 0):
-                        lidar_data_bytes[i] = 10000
+                    if(i == 0): # 起始处不管
+                        lidar_data_bytes[i] = 0
                     else:
                         lidar_data_bytes[i] = lidar_data_bytes[i-1]
                     dirty_count += 1
+            for i in range(125):
+                lidar_data_bytes[i] = 0
+            for i in range(1411,1536):
+                lidar_data_bytes[i] = 0
             lidar_data_list = lidar_data_bytes
 
             # if(dirty_count > 200): # 脏点太多，设置界限报错
             #     print("[WARNING] Lidar is very dirty.")
             #     exit(1)
-            # print("lidar_data_list",lidar_data_list)
+            print("lidar_data_list",lidar_data_list)
 
             # 数据不规整报错
             if(len(lidar_data_list) != 1536):
@@ -164,7 +174,8 @@ class Navigate_Thread(threading.Thread):
             # 发送控制命令给小车
             if(best_direction == None):
                 # 没有方向时就自转找方向
-                best_direction = 20
+                best_direction = 5
+                register_direct = 1
                 ret = canDLL.VCI_Transmit(
                     VCI_USBCAN2, 0, 0, get_move_inst(best_direction, 0), 1)
                 if ret == STATUS_OK:
@@ -172,9 +183,31 @@ class Navigate_Thread(threading.Thread):
                 if ret != STATUS_OK:
                     print('CAN1通道发送失败\r\n')
                 continue
+            
+            # 记忆转动方向
+            if(register_direct == -1 ): # 曾经是右转
+                if(best_direction == 0):
+                    register_direct = 0
+                else:
+                    best_direction = -5
+            elif(register_direct == 1 ): # 曾经左转
+                if(best_direction == 0):
+                    register_direct = 0
+                else:
+                    best_direction = 5
+            else:
+                if(best_direction < 0):
+                    register_direct = -1
+                    best_direction = -5
+                elif(best_direction > 0):
+                    register_direct = 1
+                    best_direction = 5
+                else:
+                    register_direct = 0
+
             for i in range(1):  # 只用发送一次即可，这里可设置循环增强控制效果
                 ret = canDLL.VCI_Transmit(VCI_USBCAN2, 0, 0, get_move_inst(
-                    best_direction, best_speed=0.25), 1)
+                    best_direction, best_speed=default_best_speed), 1)
                 if ret == STATUS_OK:
                     print('CAN1通道发送成功\r\n')
                 if ret != STATUS_OK:

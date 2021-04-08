@@ -5,6 +5,7 @@
 """
 from ctypes import *
 import math
+from Global_Define_Var import *
 
 # 定义初始化CAN的数据类型
 class VCI_INIT_CONFIG(Structure):
@@ -51,24 +52,41 @@ def dec_converse(dec):
     :param dec: 输入的十进制数
     :return: (first,second)
     """
+    def add_1(binary_inpute):  # 二进制编码加1
+        _, out = bin(int(binary_inpute, 2) + 1).split("b")
+        return out
+
+    def reverse(binary_inpute):  # 取反操作
+        binary_out = list(binary_inpute)
+        for epoch, i in enumerate(binary_out):
+            if i == "0":
+                binary_out[epoch] = "1"
+            else:
+                binary_out[epoch] = "0"
+        return "".join(binary_out)
+    
     if(dec < 0):
-        b_str = bin(2**16+(dec))
+        b_str = bin(-dec)[2:]
+        while(len(b_str)<16): # 填充到16位
+            b_str = '0'+b_str
+        # 补码运算
+        b_str = reverse(b_str) # 取反
+        b_str = add_1(b_str) # 加一
+
+        b_str = '1'+b_str[1:] # 符号位固定为1
         # print(b_str)
-        dec = int(b_str, 2) + 1
-        b_str = bin(dec)[2:]
-        # print(b_str)
-        # print(int(b_str[0:7], 2), int(b_str[8:15], 2))
-        return (int(b_str[0:7], 2), int(b_str[8:15], 2))
+        # print(int(b_str[0:8], 2), int(b_str[8:16], 2))
+        return (int(b_str[0:8], 2), int(b_str[8:16], 2))
     else:
         b_str = bin(dec)[2:]
         # print(b_str)
         while(len(b_str) < 16):
             b_str = '0' + b_str
         # print(b_str)
-        # print(int(b_str[0:7], 2), int(b_str[8:15], 2))
-        return (int(b_str[0:7], 2), int(b_str[8:15], 2))
+        # print(int(b_str[0:8], 2), int(b_str[8:16], 2))
+        return (int(b_str[0:8], 2), int(b_str[8:16], 2))
 
-def get_move_inst(best_direction=0, best_speed=0.15):
+def get_move_inst(best_direction = default_best_direction, best_speed = default_best_speed):
     """
     控制底盘的首次发送控制帧生成
     :param best_direction: 最优的移动方向
@@ -78,29 +96,36 @@ def get_move_inst(best_direction=0, best_speed=0.15):
     # 计算车命令的对应行进速度和转向
     # 前进为mm/s,[-3000,3000]
     # 转向为0.001rad/s,[-2523,2523]
-    best_direction %= 180
-    best_direction *= 1.3 # 增大转弯幅度
+    # best_direction %= 180  # 注意python中负数对正数取余得正数，与其他语言有区别
+    if(best_direction < 0):
+        best_direction = -best_direction
+        best_direction %= 180
+        best_direction = -best_direction
+    else:
+        best_direction %= 180
+    best_direction *= 1 # 增大转弯幅度
     direc_rad = 0
     speed = best_speed  # 0.015m/s
-    if(best_direction >= -90 or best_direction <= 90):  # 前进
-        
-        if(best_direction >= 45):
-            best_direction = 45
-            speed = 0
-        if(best_direction <= -45):
-            best_direction = -45
-            speed = 0
-    elif(best_direction < -90):  # 向右后退 == 后退+左转
-        best_direction = -(best_direction + 90)
-        speed = -speed
-    else:  # (best_direction > 90)向左后退 == 后退+右转
-        best_direction = -(best_direction - 90)
-        speed = -speed
+    # if(best_direction >= -90 or best_direction <= 90):  # 前进
+    # if(best_direction >= 5):
+    #     best_direction = 5
+    #     speed = 0
+    # if(best_direction <= -5):
+    #     best_direction = -5
+    #     speed = 0
+    # elif(best_direction < -90):  # 向右后退 == 后退+左转
+    #     best_direction = -(best_direction + 90)
+    #     speed = -speed
+    # else:  # (best_direction > 90)向左后退 == 后退+右转
+    #     best_direction = -(best_direction - 90)
+    #     speed = -speed
     
     # 转弯降速
-    speed = (90-abs(best_direction))/90 * speed
+    # speed = (90-abs(best_direction))/90 * speed
+    if(best_direction != 0):
+        speed = 0
 
-    direc_rad = math.pi / 180 * best_direction * 1000
+    direc_rad = math.pi / 180 * best_direction * 1000 # 转化为rad单位0.001rad/s
     direc_rad = int(direc_rad)
     speed = int(speed * 1000)
 

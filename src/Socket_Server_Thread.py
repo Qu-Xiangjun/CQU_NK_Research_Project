@@ -12,6 +12,7 @@ import numpy as np
 import pickle
 import random
 import struct
+from Global_Define_Var import *
 
 
 class Socket_Server_Thread(threading.Thread):
@@ -39,7 +40,7 @@ class Socket_Server_Thread(threading.Thread):
         '''
         # 配置server段socket信息
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.address = ('127.0.0.1', 8002)  # 同一网段下的本ip地址与端口
+        self.address = default_address  # 同一网段下的本ip地址与端口
         self.server.bind(self.address)  # 服务器端，将Socket与网络地址和端口绑定起来，
         self.server.listen(1)  # backlog 指定最大的连接数
         self.connection, self.des_address = self.server.accept() # 接受client
@@ -47,7 +48,6 @@ class Socket_Server_Thread(threading.Thread):
         self.ASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 当前目录
         # print(ASE_DIR) # c:\Users\49393\Desktop\NK_\scout_mini_project\src...
         
-        # 现只测试图像
         while(True):
             if(len(self.numArray) == 0 or len(self.lidar_data_list) == 0 or self.computer_cam_flag == False):
                 continue

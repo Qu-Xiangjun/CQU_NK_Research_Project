@@ -8,6 +8,7 @@ from tkinter import *
 import time
 import threading
 import serial
+from Global_Define_Var import *
 
 class Arduino_Controller_Thread(threading.Thread):
     """
@@ -18,8 +19,8 @@ class Arduino_Controller_Thread(threading.Thread):
         :param yolo_detect_thread: yolo目标检测线程类
         """
         threading.Thread.__init__(self)  # 初始化父类
-        self.serialPort = "COM8"  # 串口
-        self.baudRate = 9600  # 波特率
+        self.serialPort = default_serialPort # 串口
+        self.baudRate = default_baudRate  # 波特率
         self.yolo_detect_thread = yolo_detect_thread # yolo检测线程
         
     def run(self):
@@ -37,7 +38,10 @@ class Arduino_Controller_Thread(threading.Thread):
             result_list = []
             for x in self.yolo_detect_thread.result:
                 result_list.append(x[1])
-            control = ("bird" in result_list) # 识别结果中有鸟
+            control = False
+            for item in default_detect_object:
+                control =control or (item in result_list) # 识别结果中有item
+            
             if(control):
                 self.ser.write(demo2)  # ser.write在于向串口中写入数据
                 time.sleep(5)

@@ -5,6 +5,7 @@
 """
 
 import time 
+from Global_Define_Var import *
 
 def judge5_metre(lidar_data_list):
     """
@@ -93,10 +94,10 @@ def judge0_5metre(lidar_data_list):
     end = 0
     for i in range(len(lidar_data_list)-1): # 减一是忽略最后一个数据，以匹配角度的数量
         item = lidar_data_list[i]
-        if 250-item >= 0: # 在0.5m内有障碍物
+        if default_last_distance-item >= 0: # 在0.5m内有障碍物
             begin = end
         end += 18
-        if(end - begin >= 12888): # 大于128.88°的空闲
+        if(end - begin >= 12888*250/default_last_distance): # 大于128.88°的空闲
             if( int((begin+end)/2 % 18) != 0 ):
                 angle0_5_metre.append(int((begin + end-18)/2))
             angle0_5_metre.append(int((begin + end)/2))
@@ -135,21 +136,21 @@ def navigate(lidar_data_list):
     angle2_5_metre = judge2_5_metre(lidar_data_list)
     angle5_metre = judge5_metre(lidar_data_list)
     valid_angle = [] # 有效方向集合 即满足所有集合的要求
-    if(len(angle5_metre) != 0 ): 
+    if(len(angle5_metre) != 0 ):  # 若五米ok
         for item in angle5_metre:
             if(item in angle1_metre and item in angle2_5_metre and item in angle0_5_metre):
                 valid_angle.append(item)
-    if(len(angle2_5_metre) != 0 & len(valid_angle) == 0):
+    if(len(angle2_5_metre) != 0 & len(valid_angle) == 0): # 若2.5米ok
         for item in angle2_5_metre:
             if(item in angle1_metre and item in angle0_5_metre):
                 valid_angle.append(item)
-    if(len(angle1_metre) != 0 & len(valid_angle) == 0):
+    if(len(angle1_metre) != 0 & len(valid_angle) == 0): # 若1米ok
         for item in angle1_metre:
             if(item in angle0_5_metre):
-                valid_angle.append(item)
-    if(len(angle0_5_metre) != 0 & len(valid_angle) == 0):
+                valid_angle.append(item)   
+    elif(len(angle0_5_metre) != 0 & len(valid_angle) == 0): # 若1米内的0.5米ok
         valid_angle = angle0_5_metre
-        
+
     if(len(valid_angle) == 0):
         print("[WARNING] There is no effective direction.\n")
         # time.sleep(0.5)

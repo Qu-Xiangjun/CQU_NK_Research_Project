@@ -5,7 +5,7 @@ import numpy as np
 import pickle, struct
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-address = ('127.0.0.1', 8100)
+address = ('10.10.47.34', 8002)  # 同一网段下的本ip地址与端口
 server.bind(address) # 服务器端，将Socket与网络地址和端口绑定起来，
 server.listen(2) # backlog 指定最大的连接数
 # connection, address = server.accept()
